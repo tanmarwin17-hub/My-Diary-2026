@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -43,36 +44,48 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MyDiaryTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
-                    Conversation(SampleData.conversationSample)
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    Column(modifier = Modifier.padding(innerPadding)) {
+                        Conversation(SampleData.conversationSample)
+                    }
                 }
             }
         }
     }
 }
 
-data class Message(val author: String, val body: String)
+// 1. Updated Data Class
+data class Message(val author: String, val body: String, val star: Int)
 
 @Composable
 fun MessageCard(msg: Message) {
-    Row(modifier = Modifier.padding(all = 8.dp)) {
+    Row(
+        modifier = Modifier
+            .padding(all = 8.dp)
+            .fillMaxWidth() // Ensure the row takes full width to allow right-alignment
+    ) {
         Image(
-            painter = painterResource(R.drawable.Lexi),
+            painter = painterResource(R.drawable.lexi),
             contentDescription = null,
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
                 .border(1.5.dp, MaterialTheme.colorScheme.secondary, CircleShape)
         )
-        Spacer(modifier = Modifier.width(8.dp))
 
+        Spacer(modifier = Modifier.width(8.dp))
 
         var isExpanded by remember { mutableStateOf(false) }
         val surfaceColor by animateColorAsState(
             if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+            label = "colorAnimation"
         )
 
-        Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
+        Column(
+            modifier = Modifier
+                .clickable { isExpanded = !isExpanded }
+                .weight(1f) // Let the text column take up available space
+        ) {
             Text(
                 text = msg.author,
                 color = MaterialTheme.colorScheme.secondary,
@@ -85,7 +98,6 @@ fun MessageCard(msg: Message) {
                 shape = MaterialTheme.shapes.medium,
                 shadowElevation = 1.dp,
                 color = surfaceColor,
-                // animateContentSize will change the Surface size gradually
                 modifier = Modifier.animateContentSize().padding(1.dp)
             ) {
                 Text(
@@ -96,6 +108,14 @@ fun MessageCard(msg: Message) {
                 )
             }
         }
+
+        // 2. The Star Rating at the rightmost side
+        Text(
+            text = "★".repeat(msg.star.coerceIn(0, 5)),
+            color = androidx.compose.ui.graphics.Color.Blue,
+            modifier = Modifier.padding(start = 8.dp),
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }
 
@@ -128,7 +148,7 @@ fun PreviewConversation() {
 fun MessageCardPreview() {
     MyDiaryTheme {
         MessageCard(
-            msg = Message("Lexi", "Hey, take a look at Jetpack Compose, it's great!")
+            msg = Message("Lexi", "Hey, take a look at Jetpack Compose, it's great!", 3)
         )
     }
 }
