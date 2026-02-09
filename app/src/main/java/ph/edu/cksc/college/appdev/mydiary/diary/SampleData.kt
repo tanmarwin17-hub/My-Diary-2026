@@ -1,17 +1,21 @@
-import ph.edu.cksc.college.appdev.mydiary.Message
+package ph.edu.cksc.college.appdev.mydiary.diary
+
+import java.time.LocalDateTime
 
 /**
  * SampleData for Jetpack Compose Tutorial
  */
-object SampleData {
-
-    val conversationSample = listOf(
-        Message(
+object SampleDiaryEntries {
+    // Sample conversation data
+    val entries = listOf(
+        DiaryEntry(
+            "1", 0, 1,
             "Lexi",
             "Test...Test...Test...",
-            3
+            LocalDateTime.of(2024, 1, 1, 7, 30).toString()
         ),
-        Message(
+        DiaryEntry(
+            "2", 5, 2,
             "Lexi",
             """List of Android versions:
             |Android KitKat (API 19)
@@ -23,67 +27,81 @@ object SampleData {
             |Android 10 (API 29)
             |Android 11 (API 30)
             |Android 12 (API 31)""".trim(),
-            1
+            LocalDateTime.of(2024, 1, 2, 8, 30).toString()
+
         ),
-        Message(
+        DiaryEntry(
+            "3", 1, 3,
             "Lexi",
             """I think Kotlin is my favorite programming language.
             |It's so much fun!""".trim(),
-            4
+            LocalDateTime.of(2024, 1, 3, 9, 50).toString()
+
         ),
-        Message(
-            "Lexi",
+        DiaryEntry(
+            "4", 2, 4,
+            "Lex Luthor",
             "Searching for alternatives to XML layouts...",
-            4
+            LocalDateTime.of(2024, 1, 5, 7, 30).toString()
         ),
-        Message(
+        DiaryEntry(
+            "5", 3, 5,
             "Lexi",
             """Hey, take a look at Jetpack Compose, it's great!
             |It's the Android's modern toolkit for building native UI.
             |It simplifies and accelerates UI development on Android.
             |Less code, powerful tools, and intuitive Kotlin APIs :)""".trim(),
-            3
+            LocalDateTime.of(2024, 1, 7, 17, 30).toString()
+
         ),
-        Message(
+        DiaryEntry(
+            "6", 1, 1,
             "Lexi",
             "It's available from API 21+ :)",
-            3
+            LocalDateTime.of(2024, 1, 8, 7, 30).toString()
+
         ),
-        Message(
+        DiaryEntry(
+            "7", 2, 2,
             "Lexi",
             "Writing Kotlin for UI seems so natural, Compose where have you been all my life?",
-            2
+            LocalDateTime.of(2024, 1, 9, 7, 30).toString()
         ),
-        Message(
+        DiaryEntry(
+            "8", 6, 3,
             "Lexi",
             "Android Studio next version's name is Arctic Fox",
-            3
+            LocalDateTime.of(2024, 1, 10, 7, 30).toString()
         ),
-        Message(
+        DiaryEntry(
+            "8", 7, 4,
             "Lexi",
             "Android Studio Arctic Fox tooling for Compose is top notch ^_^",
-            4
+            LocalDateTime.of(2024, 2, 1, 7, 30).toString()
         ),
-        Message(
+        DiaryEntry(
+            "9", 4, 5,
             "Lexi",
             "I didn't know you can now run the emulator directly from Android Studio",
-            3
+            LocalDateTime.of(2024, 1, 2, 7, 30).toString()
         ),
-        Message(
+        DiaryEntry(
+            "7", 3, 1,
             "Lexi",
             "Compose Previews are great to check quickly how a composable layout looks like",
-            3
+            LocalDateTime.of(2024, 1, 3, 7, 30).toString()
         ),
-        Message(
+        DiaryEntry(
+            "3", 2, 2,
             "Lexi",
             "Previews are also interactive after enabling the experimental setting",
-            4
+            LocalDateTime.of(2024, 1, 4, 7, 30).toString()
         ),
-        Message(
+        DiaryEntry(
+            "1", 1, 3,
             "Lexi",
             "Have you tried writing build.gradle with KTS?",
-            2
-
+            LocalDateTime.of(2024, 1, 5, 7, 30).toString()
         ),
     )
 }
