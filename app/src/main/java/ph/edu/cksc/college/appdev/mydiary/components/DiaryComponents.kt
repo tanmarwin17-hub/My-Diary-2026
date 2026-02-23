@@ -133,6 +133,7 @@ fun PreviewDiaryList() {
 fun DiaryEntryCardPreview() {
     MyDiaryTheme {
         DiaryEntryCard(
+
             entry = DiaryEntry("1", 4, 5, "Lexi", "Hey, take a look at Jetpack Compose, it's great!",
                 LocalDateTime.now().toString())
         )
