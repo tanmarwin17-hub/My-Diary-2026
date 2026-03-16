@@ -25,12 +25,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ph.edu.cksc.college.appdev.mydiary.diary.Login
 import ph.edu.cksc.college.appdev.mydiary.diary.Registration
 import ph.edu.cksc.college.appdev.mydiary.ui.theme.MyDiaryTheme
 
 @Composable
-fun RegisterComponent (
-    viewModel: RegisterViewModel,
+fun LoginComponent(
+    viewModel: LoginViewModel,
     test: Boolean
 ) {
     val entry by viewModel.account
@@ -39,14 +40,6 @@ fun RegisterComponent (
     Column(
         modifier = Modifier.fillMaxSize().padding(4.dp),
     ) {
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = entry.name,
-            onValueChange = {
-                viewModel.onNameChange(it)
-            },
-            label = { Text("Name") }
-        )
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = entry.email,
@@ -62,16 +55,6 @@ fun RegisterComponent (
                 viewModel.onPasswordChange(it)
             },
             label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-        )
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = entry.retypePassword,
-            onValueChange = {
-                viewModel.onRetypePasswordChange(it)
-            },
-            label = { Text("Retype Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
@@ -91,12 +74,12 @@ fun RegisterComponent (
                 modifier = Modifier.padding(8.dp),
                 onClick = {
                     error = ""
-                    if (entry.password != entry.retypePassword) {
-                        error = "Password didn't match"
+                    if (entry.password.isEmpty() || entry.email.isEmpty()) {
+                        error = "Email and Password are required"
                     }
                 }
             ) {
-                Text("Register")
+                Text("Login")
             }
         }
         Text(color = Color.Red, text = error)
@@ -106,18 +89,14 @@ fun RegisterComponent (
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
-fun RegisterComponentPreview() {
+fun LoginComponentPreview() {
     MyDiaryTheme(dynamicColor = false) {
-        RegisterComponent(
-            viewModel = object : RegisterViewModel {
+        LoginComponent(
+            viewModel = object : LoginViewModel {
                 @SuppressLint("UnrememberedMutableState")
-                override var account = mutableStateOf(Registration())
+                override var account = mutableStateOf(Login())
 
                 override var modified: Boolean = true
-
-                override fun onNameChange(newValue: String) {
-                    account.value = account.value.copy(name = newValue)
-                }
 
                 override fun onEmailChange(newValue: String) {
                     account.value = account.value.copy(email = newValue)
@@ -125,10 +104,6 @@ fun RegisterComponentPreview() {
 
                 override fun onPasswordChange(newValue: String) {
                     account.value = account.value.copy(password = newValue)
-                }
-
-                override fun onRetypePasswordChange(newValue: String) {
-                    account.value = account.value.copy(retypePassword = newValue)
                 }
             },
             test = true

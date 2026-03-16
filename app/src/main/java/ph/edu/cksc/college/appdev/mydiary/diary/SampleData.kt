@@ -1,13 +1,12 @@
-package ph.edu.cksc.college.appdev.mydiary.diary
-
+import android.os.Build
+import androidx.annotation.RequiresApi
+import ph.edu.cksc.college.appdev.mydiary.diary.DiaryEntry
 import java.time.LocalDateTime
 
-/**
- * SampleData for Jetpack Compose Tutorial
- */
 object SampleDiaryEntries {
     // Sample conversation data
-    val entries = listOf(
+    @RequiresApi(Build.VERSION_CODES.O)
+    val entries = mutableListOf(
         DiaryEntry(
             "1", 0, 1,
             "Lexi",

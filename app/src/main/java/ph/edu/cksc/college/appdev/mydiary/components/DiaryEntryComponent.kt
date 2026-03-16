@@ -1,5 +1,6 @@
 package ph.edu.cksc.college.appdev.mydiary.components
 
+import SampleDiaryEntries
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi

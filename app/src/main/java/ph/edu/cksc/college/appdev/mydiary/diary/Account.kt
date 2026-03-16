@@ -10,11 +10,18 @@ data class Account(
     val password: String = "",
     val dateTime: String = LocalDateTime.now().toString()
 )
-data class Registration(
-    val id: String = "",
+
+data class Registration (
     val name: String = "",
     val email: String = "",
     val password: String = "",
     val retypePassword: String = "",
-
 )
+
+
+
+data class Login (
+    val email: String = "",
+    val password: String = "",
+)
+

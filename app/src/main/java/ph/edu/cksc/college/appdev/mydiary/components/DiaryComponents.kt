@@ -1,10 +1,13 @@
 package ph.edu.cksc.college.appdev.mydiary.components
 
+import SampleDiaryEntries
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,8 +19,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,103 +35,117 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import ph.edu.cksc.college.appdev.mydiary.DIARY_ENTRY_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.diary.DiaryEntry
-import ph.edu.cksc.college.appdev.mydiary.diary.SampleDiaryEntries
 import ph.edu.cksc.college.appdev.mydiary.diary.moodList
 import ph.edu.cksc.college.appdev.mydiary.ui.theme.MyDiaryTheme
-import java.time.LocalDateTime
 
 @Composable
-fun DiaryEntryCard(entry: DiaryEntry) {
-    // Parent Row containing the entire entry
-    Row(
-        modifier = Modifier
-            .padding(all = 8.dp)
-            .fillMaxWidth(), // Fill width to allow right-alignment
-        verticalAlignment = androidx.compose.ui.Alignment.Top
-    ) {
-        // 1. LEFTMOST: Profile Image
-        Icon(
-            imageVector = moodList[entry.mood].icon,
-            tint = moodList[entry.mood].color,
-            contentDescription = null,
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .border(1.5.dp, MaterialTheme.colorScheme.secondary, CircleShape)
-        )
-
+fun DiaryEntryCard(
+    entry: DiaryEntry,
+    navController: NavHostController
+) {
+    Row(modifier = Modifier.padding(all = 8.dp)) {
+        IconButton(onClick = {
+            Log.d("Id", entry.id)
+            navController.navigate("$DIARY_ENTRY_SCREEN/${entry.id}")
+        }) {
+            Icon(
+                imageVector = moodList[entry.mood].icon,
+                tint = moodList[entry.mood].color,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, MaterialTheme.colorScheme.secondary, CircleShape)
+            )
+        }
         Spacer(modifier = Modifier.width(8.dp))
 
+        // We keep track if the message is expanded or not in this
+        // variable
         var isExpanded by remember { mutableStateOf(false) }
+        // surfaceColor will be updated gradually from one color to the other
         val surfaceColor by animateColorAsState(
             if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-            label = "SurfaceColor"
         )
 
-        // 2. MIDDLE: Author and Message Body
+        // We toggle the isExpanded variable when we click on this Column
         Column(modifier = Modifier
-                .weight(1f) // Takes up remaining space, pushing the stars to the end
-                .clickable { isExpanded = !isExpanded }
-        ) {
-            Text(
-                text = entry.title,
-                color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.titleSmall
-            )
+            .weight(1f)
+            .clickable { isExpanded = !isExpanded }) {
+            Row(Modifier.fillMaxWidth()) {
+                Text(
+                    text = entry.title,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            }
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 shadowElevation = 1.dp,
+                // surfaceColor color will be changing gradually from primary to surface
                 color = surfaceColor,
-                modifier = Modifier.animateContentSize().padding(1.dp)
+                // animateContentSize will change the Surface size gradually
+                modifier = Modifier
+                    .animateContentSize()
+                    .padding(1.dp)
             ) {
                 Text(
                     text = entry.content,
                     modifier = Modifier.padding(all = 4.dp),
+                    // If the message is expanded, we display all its content
+                    // otherwise we only display the first line
                     maxLines = if (isExpanded) Int.MAX_VALUE else 1,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
-
         Spacer(modifier = Modifier.width(8.dp))
-
-        // 3. RIGHTMOST: Star Icons
-        Text(
-            // Repeat the ★ character based on the star count
-            text = "★".repeat(entry.star.coerceIn(0, 5)),
-            color = Color(0xFFFFD700), // Yellow/Gold
-            style = MaterialTheme.typography.labelLarge
-        )
+        Text(text = "⭐".repeat(entry.star))
     }
 }
 
 @Composable
-fun DiaryList(entries: List<DiaryEntry>) {
-    LazyColumn {
-        items(entries) { entry ->
-            DiaryEntryCard(entry)
+fun DiaryList(
+    entries: List<DiaryEntry>,
+    navController: NavHostController
+) {
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { },
+            ) {
+                Icon(Icons.Filled.Add, "New entry")
+            }
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            LazyColumn {
+                items(entries) { entry ->
+                    DiaryEntryCard(entry, navController)
+                }
+            }
         }
     }
 }
 
 @Preview
 @Composable
-fun PreviewDiaryList() {
-    MyDiaryTheme {
-        DiaryList(SampleDiaryEntries.entries)
+fun PreviewConversation() {
+    val navController = rememberNavController()
+    MyDiaryTheme() {
+        DiaryList(SampleDiaryEntries.entries, navController)
     }
 }
 
-@Preview(
-    name = "Light Mode"
-)
+@Preview(name = "Light Mode")
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     showBackground = true,
@@ -131,11 +153,12 @@ fun PreviewDiaryList() {
 )
 @Composable
 fun DiaryEntryCardPreview() {
+    val navController = rememberNavController()
     MyDiaryTheme {
         DiaryEntryCard(
-
-            entry = DiaryEntry("1", 4, 5, "Lexi", "Hey, take a look at Jetpack Compose, it's great!",
-                LocalDateTime.now().toString())
+            entry = DiaryEntry("1", 4, 5,
+                "Lexi", "Jetpack Compose", "16:12"),
+            navController = navController
         )
     }
 }
