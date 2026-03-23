@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import io.github.jan.supabase.createSupabaseClient
 import ph.edu.cksc.college.appdev.mydiary.components.DiaryEntryViewModel
 import ph.edu.cksc.college.appdev.mydiary.diary.DiaryEntry
 import ph.edu.cksc.college.appdev.mydiary.screens.AboutScreen
@@ -26,8 +27,15 @@ import ph.edu.cksc.college.appdev.mydiary.screens.RegistrationScreen
 import ph.edu.cksc.college.appdev.mydiary.ui.theme.MyDiaryTheme
 import java.time.LocalDateTime
 
+val supabase = createSupabaseClient(
+    supabaseUrl = BuildConfig.SUPABASE_URL,
+    supabaseKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY
+) {
+    //install(Postgrest)
+}
+
+
 class MainActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -38,7 +46,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+
     @Composable
     fun AppNavigation() {
         val navController = rememberNavController()
