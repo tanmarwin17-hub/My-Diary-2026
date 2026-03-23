@@ -58,20 +58,25 @@ fun LoginScreen(navController: NavHostController) {
 
 @Composable
 fun LoginScrollContent(innerPadding: PaddingValues, navController: NavHostController) {
-    LoginComponent(viewModel = object : LoginViewModel {
-        @SuppressLint("UnrememberedMutableState")
-        override var account = mutableStateOf(Login())
+    Box(
+        modifier = Modifier.padding(innerPadding)
+    ) {
+        LoginComponent(
+            viewModel = object : LoginViewModel {
+                @SuppressLint("UnrememberedMutableState")
+                override var account = mutableStateOf(Login())
 
-        override var modified: Boolean = true
+                override var modified: Boolean = true
 
-        override fun onEmailChange(newValue: String) {
-            account.value = account.value.copy(email = newValue)
-        }
+                override fun onEmailChange(newValue: String) {
+                    account.value = account.value.copy(email = newValue)
+                }
 
-        override fun onPasswordChange(newValue: String) {
-            account.value = account.value.copy(password = newValue)
-        }
-    },
-        test = false
-    )
+                override fun onPasswordChange(newValue: String) {
+                    account.value = account.value.copy(password = newValue)
+                }
+            },
+            test = false
+        )
+    }
 }

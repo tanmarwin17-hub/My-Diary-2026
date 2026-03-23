@@ -1,8 +1,13 @@
 package ph.edu.cksc.college.appdev.mydiary.screens
 
+import SampleDiaryEntries
 import android.app.Activity
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -22,13 +27,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import ph.edu.cksc.college.appdev.mydiary.ABOUT_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.DIARY_ENTRY_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.components.DiaryList
 import ph.edu.cksc.college.appdev.mydiary.diary.DiaryEntry
 
-
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavHostController) {
@@ -69,7 +76,7 @@ fun MainScreen(navController: NavHostController) {
                             )
                         }
                         IconButton(onClick = {
-                            navController.navigate("ABOUT_SCREEN")
+                            navController.navigate(ABOUT_SCREEN)
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Info,
@@ -109,5 +116,9 @@ fun MainScrollContent(
     innerPadding: PaddingValues,
     navController: NavHostController
 ) {
-    DiaryList(dataList, navController)
+    Box(
+        modifier = Modifier.padding(innerPadding)
+    ) {
+        DiaryList(dataList, navController)
+    }
 }

@@ -117,21 +117,9 @@ fun DiaryList(
     entries: List<DiaryEntry>,
     navController: NavHostController
 ) {
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { },
-            ) {
-                Icon(Icons.Filled.Add, "New entry")
-            }
-        }
-    ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            LazyColumn {
-                items(entries) { entry ->
-                    DiaryEntryCard(entry, navController)
-                }
-            }
+    LazyColumn {
+        items(entries) { entry ->
+            DiaryEntryCard(entry, navController)
         }
     }
 }

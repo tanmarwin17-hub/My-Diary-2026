@@ -58,28 +58,33 @@ fun RegistrationScreen(navController: NavHostController) {
 
 @Composable
 fun RegistrationScrollContent(innerPadding: PaddingValues, navController: NavHostController) {
-    RegisterComponent(viewModel = object : RegisterViewModel {
-        @SuppressLint("UnrememberedMutableState")
-        override var account = mutableStateOf(Registration())
+    Box(
+        modifier = Modifier.padding(innerPadding)
+    ) {
+        RegisterComponent(
+            viewModel = object : RegisterViewModel {
+                @SuppressLint("UnrememberedMutableState")
+                override var account = mutableStateOf(Registration())
 
-        override var modified: Boolean = true
+                override var modified: Boolean = true
 
-        override fun onNameChange(newValue: String) {
-            account.value = account.value.copy(name = newValue)
-        }
+                override fun onNameChange(newValue: String) {
+                    account.value = account.value.copy(name = newValue)
+                }
 
-        override fun onEmailChange(newValue: String) {
-            account.value = account.value.copy(email = newValue)
-        }
+                override fun onEmailChange(newValue: String) {
+                    account.value = account.value.copy(email = newValue)
+                }
 
-        override fun onPasswordChange(newValue: String) {
-            account.value = account.value.copy(password = newValue)
-        }
+                override fun onPasswordChange(newValue: String) {
+                    account.value = account.value.copy(password = newValue)
+                }
 
-        override fun onRetypePasswordChange(newValue: String) {
-            account.value = account.value.copy(retypePassword = newValue)
-        }
-    },
-        test = false
-    )
+                override fun onRetypePasswordChange(newValue: String) {
+                    account.value = account.value.copy(retypePassword = newValue)
+                }
+            },
+            test = false
+        )
+    }
 }
