@@ -2,8 +2,7 @@ package ph.edu.cksc.college.appdev.mydiary.screens
 
 import SampleDiaryEntries
 import android.app.Activity
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,18 +30,60 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.Serializable
 import ph.edu.cksc.college.appdev.mydiary.ABOUT_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.DIARY_ENTRY_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.components.DiaryList
 import ph.edu.cksc.college.appdev.mydiary.diary.DiaryEntry
+import ph.edu.cksc.college.appdev.mydiary.supabase
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-@RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
+@Serializable
+data class Entry @OptIn(ExperimentalTime::class) constructor(
+    val id: String,
+    val user_id: String,
+    val created_at: Instant,
+    val title: String,
+    val content: String,
+    val mood: Int,
+    val star: Int,
+)
+
+// just a demo to read entries
+suspend fun initDiaryList(): List<Entry> {
+    val list = supabase.from("entries").select().decodeList<Entry>()
+    return list
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun MainScreen(navController: NavHostController) {
     val context = LocalContext.current
     var searchQuery by remember { mutableStateOf("") }
     val dataList = SampleDiaryEntries.entries   //viewModel.filterText(searchQuery).collectAsState(initial = emptyList())
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            val list = initDiaryList()
+            Log.d("MainScreen", list.toString())
+            /*dataList.clear()
+            for (entry in list) {
+                dataList.add(mutableStateOf(DiaryEntry(
+                    entry.id,
+                    entry.mood,
+                    entry.star,
+                    entry.title,
+                    entry.content,
+                    entry.created_at.toLocalDateTime(TimeZone.currentSystemDefault()).toString()
+                )))
+            }*/
+        }
+    }
 
     var isSearchExpanded by remember { mutableStateOf(false) }
 
