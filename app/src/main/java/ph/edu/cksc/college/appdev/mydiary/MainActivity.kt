@@ -1,21 +1,27 @@
 package ph.edu.cksc.college.appdev.mydiary
 
+import SampleDiaryEntries
 import android.annotation.SuppressLint
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
 import ph.edu.cksc.college.appdev.mydiary.components.DiaryEntryViewModel
 import ph.edu.cksc.college.appdev.mydiary.diary.DiaryEntry
 import ph.edu.cksc.college.appdev.mydiary.screens.AboutScreen
@@ -31,9 +37,9 @@ val supabase = createSupabaseClient(
     supabaseUrl = BuildConfig.SUPABASE_URL,
     supabaseKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY
 ) {
-    //install(Postgrest)
+    install(Auth)
+    install(Postgrest)
 }
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,9 +52,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
+    @SuppressLint("UnrememberedMutableState")
     @Composable
     fun AppNavigation() {
+        val snackbarHostState = remember { SnackbarHostState() }
         val navController = rememberNavController()
         val viewModel = object: DiaryEntryViewModel {
             @SuppressLint("UnrememberedMutableState")
@@ -102,27 +109,30 @@ class MainActivity : ComponentActivity() {
                 navController.popBackStack()
             }
         }
-        NavHost(navController = navController, startDestination = ACCOUNT_SCREEN) {
-            composable(ACCOUNT_SCREEN) { AccountScreen(navController = navController) }
-            composable(MAIN_SCREEN) { MainScreen(navController = navController) }
-            composable(ABOUT_SCREEN) { AboutScreen(navController = navController) }
-            composable(LOGIN_SCREEN) { LoginScreen(navController = navController) }
-            composable(REGISTRATION_SCREEN) { RegistrationScreen(navController = navController) }
-            composable("$DIARY_ENTRY_SCREEN/{id}",
-                arguments = listOf(navArgument("id") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val arguments = requireNotNull(backStackEntry.arguments)
-                val id = arguments.getString("id") ?: "1"
-                Log.d("Test", "id: " + id)
-                for (entry in SampleDiaryEntries.entries) {
-                    if (entry.id == id) {
-                        viewModel.diaryEntry = mutableStateOf(entry)
-                        break
+        Scaffold(snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { innerPadding ->
+            NavHost(navController = navController, startDestination = ACCOUNT_SCREEN) {
+                composable(ACCOUNT_SCREEN) { AccountScreen(navController = navController) }
+                composable(MAIN_SCREEN) { MainScreen(navController = navController) }
+                composable(ABOUT_SCREEN) { AboutScreen(navController = navController) }
+                composable(LOGIN_SCREEN) { LoginScreen(navController = navController, snackbarHostState = snackbarHostState) }
+                composable(REGISTRATION_SCREEN) { RegistrationScreen(navController = navController, snackbarHostState = snackbarHostState) }
+                composable(
+                    "$DIARY_ENTRY_SCREEN/{id}",
+                    arguments = listOf(navArgument("id") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val arguments = requireNotNull(backStackEntry.arguments)
+                    val id = arguments.getString("id") ?: "1"
+                    Log.d("Test", "id: " + id)
+                    for (entry in SampleDiaryEntries.entries) {
+                        if (entry.id == id) {
+                            viewModel.diaryEntry = mutableStateOf(entry)
+                            break
+                        }
                     }
+                    //viewModel.diaryEntry
+                    //val viewModel: DiaryEntryViewModel = hiltViewModel()
+                    DiaryEntryScreen(navController = navController, viewModel = viewModel)
                 }
-                //viewModel.diaryEntry
-                //val viewModel: DiaryEntryViewModel = hiltViewModel()
-                DiaryEntryScreen(navController = navController, viewModel = viewModel)
             }
         }
     }

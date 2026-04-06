@@ -1,6 +1,7 @@
 package ph.edu.cksc.college.appdev.mydiary.screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,16 +18,40 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import ph.edu.cksc.college.appdev.mydiary.LOGIN_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.MAIN_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.REGISTRATION_SCREEN
+import ph.edu.cksc.college.appdev.mydiary.supabase
+
+@Serializable
+data class Profile (
+    val id: String,
+    val email: String,
+    @SerialName("full_name")  val fullName: String)
+
+// just a demo to read profiles
+suspend fun init() {
+    val list = supabase.from("profiles").select().decodeList<Profile>()
+    Log.d("AccountScreen", list.toString())
+}
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(navController: NavHostController) {
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            init()
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
