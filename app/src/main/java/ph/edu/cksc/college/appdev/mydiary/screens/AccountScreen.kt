@@ -19,10 +19,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -43,15 +47,34 @@ suspend fun init() {
     Log.d("AccountScreen", list.toString())
 }
 
+fun getSettion(): String {
+    try {
+        val session: UserSession? = supabase.auth.currentSessionOrNull()
+        userSession = session
+        println("User signed in previously successfully: ${userSession}")
+        return "Success"
+    } catch (e: Exception) {
+        val error = e.message ?: "Session error"
+        Log.e("Session", error, e)
+        println("Get Session failed: ${error}")
+        return error
+    }
+}
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(navController: NavHostController) {
+    // if you want automatic, uncomment these
+    /*val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            init()
+        scope.launch {
+            val result = getSettion()
+            if (result == "Success") {
+                navController.navigate(MAIN_SCREEN)
+            }
         }
-    }
+    }*/
     Scaffold(
         topBar = {
             TopAppBar(
@@ -81,6 +104,7 @@ fun AccountScreen(navController: NavHostController) {
 
 @Composable
 fun AccountScrollContent(innerPadding: PaddingValues, navController: NavHostController) {
+    val scope = rememberCoroutineScope()
     Box(
         modifier = Modifier.padding(innerPadding)
     ) {
@@ -96,9 +120,21 @@ fun AccountScrollContent(innerPadding: PaddingValues, navController: NavHostCont
                 Text("Login")
             }
             Button( onClick = {
-                navController.navigate(MAIN_SCREEN)
+                scope.launch {
+                    supabase.auth.signOut()
+                }
             }) {
-                Text("Guest lang po")
+                Text("Log out")
+            }
+            Button( onClick = {
+                scope.launch {
+                    val result = getSettion()
+                    if (result == "Success") {
+                        navController.navigate(MAIN_SCREEN)
+                    }
+                }
+            }) {
+                Text("Resume if already signed in")
             }
         }
     }
