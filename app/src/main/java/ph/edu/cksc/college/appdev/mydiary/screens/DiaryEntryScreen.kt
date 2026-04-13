@@ -2,6 +2,7 @@ package ph.edu.cksc.college.appdev.mydiary.screens
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
@@ -22,7 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,6 +37,7 @@ import ph.edu.cksc.college.appdev.mydiary.components.DiaryEntryComponent
 import ph.edu.cksc.college.appdev.mydiary.components.DiaryEntryViewModel
 import ph.edu.cksc.college.appdev.mydiary.components.TimeDialog
 import ph.edu.cksc.college.appdev.mydiary.diary.DiaryEntry
+import ph.edu.cksc.college.appdev.mydiary.service.StorageService
 import java.time.LocalDateTime
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -41,9 +45,22 @@ import java.time.LocalDateTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiaryEntryScreen(
+    id: String,
     viewModel: DiaryEntryViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    storageService: StorageService
 ) {
+    val entries = remember { mutableStateListOf(DiaryEntry()) }
+    LaunchedEffect(Unit) {
+        Log.d("Dinner", "Breakfast")
+        val entry = if (id != "")
+            storageService.getDiaryEntry(id) ?: DiaryEntry()
+        else
+            DiaryEntry()
+        entries.add(0, entry)
+        Log.d("Entry", entries[0].toString())
+        viewModel.diaryEntry = mutableStateOf(entry)
+    }
     val entry by viewModel.diaryEntry
     val activity = LocalContext.current
     val date: LocalDateTime = LocalDateTime.parse(entry.dateTime)

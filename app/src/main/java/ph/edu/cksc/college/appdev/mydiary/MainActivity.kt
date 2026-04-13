@@ -10,10 +10,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,6 +22,7 @@ import androidx.navigation.navArgument
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
+import kotlinx.coroutines.launch
 import ph.edu.cksc.college.appdev.mydiary.components.DiaryEntryViewModel
 import ph.edu.cksc.college.appdev.mydiary.diary.DiaryEntry
 import ph.edu.cksc.college.appdev.mydiary.screens.AboutScreen
@@ -30,6 +31,7 @@ import ph.edu.cksc.college.appdev.mydiary.screens.DiaryEntryScreen
 import ph.edu.cksc.college.appdev.mydiary.screens.LoginScreen
 import ph.edu.cksc.college.appdev.mydiary.screens.MainScreen
 import ph.edu.cksc.college.appdev.mydiary.screens.RegistrationScreen
+import ph.edu.cksc.college.appdev.mydiary.service.StorageService
 import ph.edu.cksc.college.appdev.mydiary.ui.theme.MyDiaryTheme
 import java.time.LocalDateTime
 
@@ -55,6 +57,8 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("UnrememberedMutableState")
     @Composable
     fun AppNavigation() {
+        val scope = rememberCoroutineScope()
+        val storageService = StorageService(supabase)
         val snackbarHostState = remember { SnackbarHostState() }
         val navController = rememberNavController()
         val viewModel = object: DiaryEntryViewModel {
@@ -94,25 +98,22 @@ class MainActivity : ComponentActivity() {
                 modified = true
             }
             override fun onDoneClick(popUpScreen: () -> Unit) {
-                if (diaryEntry.value.id == "") {
-                    SampleDiaryEntries.entries.add(diaryEntry.value)
-                } else {
-                    var index = 0
-                    for (entry in SampleDiaryEntries.entries) {
-                        if (entry.id == diaryEntry.value.id) {
-                            break
-                        }
-                        index++
+                scope.launch {
+                    val editedEntry = diaryEntry.value
+                    if (editedEntry.id.isBlank()) {
+                        storageService.save(editedEntry)
+                    } else {
+                        storageService.update(editedEntry)
                     }
-                    SampleDiaryEntries.entries[index] = diaryEntry.value
+                    popUpScreen()
                 }
-                navController.popBackStack()
+                //navController.popBackStack()
             }
         }
         Scaffold(snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { innerPadding ->
             NavHost(navController = navController, startDestination = ACCOUNT_SCREEN) {
                 composable(ACCOUNT_SCREEN) { AccountScreen(navController = navController) }
-                composable(MAIN_SCREEN) { MainScreen(navController = navController) }
+                composable(MAIN_SCREEN) { MainScreen(navController = navController, storageService = storageService) }
                 composable(ABOUT_SCREEN) { AboutScreen(navController = navController) }
                 composable(LOGIN_SCREEN) { LoginScreen(navController = navController, snackbarHostState = snackbarHostState) }
                 composable(REGISTRATION_SCREEN) { RegistrationScreen(navController = navController, snackbarHostState = snackbarHostState) }
@@ -131,7 +132,7 @@ class MainActivity : ComponentActivity() {
                     }
                     //viewModel.diaryEntry
                     //val viewModel: DiaryEntryViewModel = hiltViewModel()
-                    DiaryEntryScreen(navController = navController, viewModel = viewModel)
+                    DiaryEntryScreen(id, navController = navController, viewModel = viewModel, storageService = storageService)
                 }
             }
         }

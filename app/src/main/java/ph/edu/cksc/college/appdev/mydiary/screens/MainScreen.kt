@@ -1,8 +1,6 @@
 package ph.edu.cksc.college.appdev.mydiary.screens
 
-import SampleDiaryEntries
 import android.app.Activity
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,7 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,15 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import io.github.jan.supabase.postgrest.from
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import ph.edu.cksc.college.appdev.mydiary.ABOUT_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.DIARY_ENTRY_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.components.DiaryList
 import ph.edu.cksc.college.appdev.mydiary.diary.DiaryEntry
+import ph.edu.cksc.college.appdev.mydiary.service.StorageService
 import ph.edu.cksc.college.appdev.mydiary.supabase
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -63,27 +58,11 @@ suspend fun initDiaryList(): List<Entry> {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(navController: NavHostController, storageService: StorageService) {
     val context = LocalContext.current
     var searchQuery by remember { mutableStateOf("") }
-    val dataList = SampleDiaryEntries.entries   //viewModel.filterText(searchQuery).collectAsState(initial = emptyList())
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            val list = initDiaryList()
-            Log.d("MainScreen", list.toString())
-            /*dataList.clear()
-            for (entry in list) {
-                dataList.add(mutableStateOf(DiaryEntry(
-                    entry.id,
-                    entry.mood,
-                    entry.star,
-                    entry.title,
-                    entry.content,
-                    entry.created_at.toLocalDateTime(TimeZone.currentSystemDefault()).toString()
-                )))
-            }*/
-        }
-    }
+    //val dataList = SampleDiaryEntries.entries   //viewModel.filterText(searchQuery).collectAsState(initial = emptyList())
+    val dataList = storageService.getFilteredEntries(searchQuery).collectAsState(initial = emptyList())
 
     var isSearchExpanded by remember { mutableStateOf(false) }
 
@@ -148,13 +127,13 @@ fun MainScreen(navController: NavHostController) {
             }
         }
     ) { innerPadding ->
-        MainScrollContent(dataList, innerPadding, navController)
+        MainScrollContent(dataList.value, innerPadding, navController)
     }
 }
 
 @Composable
 fun MainScrollContent(
-    dataList: MutableList<DiaryEntry>,
+    dataList: List<DiaryEntry>,
     innerPadding: PaddingValues,
     navController: NavHostController
 ) {
