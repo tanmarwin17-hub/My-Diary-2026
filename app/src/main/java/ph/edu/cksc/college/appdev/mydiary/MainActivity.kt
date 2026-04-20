@@ -31,6 +31,7 @@ import ph.edu.cksc.college.appdev.mydiary.screens.DiaryEntryScreen
 import ph.edu.cksc.college.appdev.mydiary.screens.LoginScreen
 import ph.edu.cksc.college.appdev.mydiary.screens.MainScreen
 import ph.edu.cksc.college.appdev.mydiary.screens.RegistrationScreen
+import ph.edu.cksc.college.appdev.mydiary.service.AccountService
 import ph.edu.cksc.college.appdev.mydiary.service.StorageService
 import ph.edu.cksc.college.appdev.mydiary.ui.theme.MyDiaryTheme
 import java.time.LocalDateTime
@@ -59,6 +60,7 @@ class MainActivity : ComponentActivity() {
     fun AppNavigation() {
         val scope = rememberCoroutineScope()
         val storageService = StorageService(supabase)
+        val accountService = AccountService(supabase)
         val snackbarHostState = remember { SnackbarHostState() }
         val navController = rememberNavController()
         val viewModel = object: DiaryEntryViewModel {
@@ -115,8 +117,10 @@ class MainActivity : ComponentActivity() {
                 composable(ACCOUNT_SCREEN) { AccountScreen(navController = navController) }
                 composable(MAIN_SCREEN) { MainScreen(navController = navController, storageService = storageService) }
                 composable(ABOUT_SCREEN) { AboutScreen(navController = navController) }
-                composable(LOGIN_SCREEN) { LoginScreen(navController = navController, snackbarHostState = snackbarHostState) }
-                composable(REGISTRATION_SCREEN) { RegistrationScreen(navController = navController, snackbarHostState = snackbarHostState) }
+                composable(LOGIN_SCREEN) { LoginScreen(navController = navController,
+                    snackbarHostState = snackbarHostState,
+                    accountService = accountService ) }
+                composable(REGISTRATION_SCREEN) { RegistrationScreen(navController = navController, snackbarHostState = snackbarHostState, accountService = accountService) }
                 composable(
                     "$DIARY_ENTRY_SCREEN/{id}",
                     arguments = listOf(navArgument("id") { type = NavType.StringType })

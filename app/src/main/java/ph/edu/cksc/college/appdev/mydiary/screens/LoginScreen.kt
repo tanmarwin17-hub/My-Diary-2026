@@ -22,40 +22,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.builtin.Email
-import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.launch
 import ph.edu.cksc.college.appdev.mydiary.MAIN_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.components.LoginComponent
 import ph.edu.cksc.college.appdev.mydiary.components.LoginViewModel
 import ph.edu.cksc.college.appdev.mydiary.diary.Login
-import ph.edu.cksc.college.appdev.mydiary.supabase
-
-var userSession: UserSession? = null
-
-suspend fun signInUser(email: String, password: String): String {
-    try {
-        val result = supabase.auth.signInWith(Email) {
-            this.email = email
-            this.password = password
-        }
-        val session: UserSession? = supabase.auth.currentSessionOrNull()
-        userSession = session
-        println("User signed in successfully: ${userSession}")
-        return "Success"
-    } catch (e: Exception) {
-        val error = e.message ?: "Login error"
-        Log.e("Login", error, e)
-        println("Sign-in failed: ${error}")
-        return error
-    }
-}
+import ph.edu.cksc.college.appdev.mydiary.service.AccountService
+import ph.edu.cksc.college.appdev.mydiary.service.userSession
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavHostController, snackbarHostState: SnackbarHostState) {
+fun LoginScreen(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+    accountService: AccountService
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -79,7 +61,7 @@ fun LoginScreen(navController: NavHostController, snackbarHostState: SnackbarHos
             )
         },
     ) { innerPadding ->
-        LoginScrollContent(innerPadding, navController, snackbarHostState)
+        LoginScrollContent(innerPadding, navController, snackbarHostState, accountService)
     }
 }
 
@@ -87,7 +69,8 @@ fun LoginScreen(navController: NavHostController, snackbarHostState: SnackbarHos
 fun LoginScrollContent(
     innerPadding: PaddingValues,
     navController: NavHostController,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    accountService: AccountService
 ) {
     val scope = rememberCoroutineScope()
 
@@ -112,7 +95,7 @@ fun LoginScrollContent(
 
                 override suspend fun login(): String {
                     Log.d("Login", "Loging in ${account.value.email}")
-                    val result = signInUser(account.value.email, account.value.password)
+                    val result = accountService.signInUser(account.value.email, account.value.password)
                     if (result == "Success") {
                         scope.launch {
                             val user = userSession?.user?.email

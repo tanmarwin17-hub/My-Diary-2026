@@ -33,6 +33,7 @@ import kotlinx.serialization.Serializable
 import ph.edu.cksc.college.appdev.mydiary.LOGIN_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.MAIN_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.REGISTRATION_SCREEN
+import ph.edu.cksc.college.appdev.mydiary.service.userSession
 import ph.edu.cksc.college.appdev.mydiary.supabase
 
 @Serializable

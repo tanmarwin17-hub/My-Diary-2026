@@ -21,45 +21,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.builtin.Email
-import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import ph.edu.cksc.college.appdev.mydiary.MAIN_SCREEN
 import ph.edu.cksc.college.appdev.mydiary.components.RegisterComponent
 import ph.edu.cksc.college.appdev.mydiary.components.RegisterViewModel
 import ph.edu.cksc.college.appdev.mydiary.diary.Registration
-import ph.edu.cksc.college.appdev.mydiary.supabase
-
-suspend fun registerUser(name: String, email: String, password: String): String {
-    try {
-        val reponse = supabase.auth.signUpWith(Email) {
-            this.email = email
-            this.password = password
-            data = buildJsonObject {
-                put("full_name", name)
-                put("email", email)
-            }
-        }
-        println("User registered successfully: ${reponse}")
-        val session: UserSession? = supabase.auth.currentSessionOrNull()
-        userSession = session
-        println("User auto signed in successfully: ${userSession}")
-        return "Success"
-    } catch (e: Exception) {
-        val error = e.message ?: "Sign up error"
-        Log.e("Sign up", error, e)
-        println("Sign-up failed: ${error}")
-        return error
-    }
-}
+import ph.edu.cksc.college.appdev.mydiary.service.AccountService
+import ph.edu.cksc.college.appdev.mydiary.service.userSession
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationScreen(navController: NavHostController, snackbarHostState: SnackbarHostState) {
+fun RegistrationScreen(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+    accountService: AccountService
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -83,7 +60,7 @@ fun RegistrationScreen(navController: NavHostController, snackbarHostState: Snac
             )
         },
     ) { innerPadding ->
-        RegistrationScrollContent(innerPadding, navController, snackbarHostState)
+        RegistrationScrollContent(innerPadding, navController, snackbarHostState, accountService)
     }
 }
 
@@ -91,7 +68,8 @@ fun RegistrationScreen(navController: NavHostController, snackbarHostState: Snac
 fun RegistrationScrollContent(
     innerPadding: PaddingValues,
     navController: NavHostController,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    accountService: AccountService
 ) {
     val scope = rememberCoroutineScope()
 
@@ -123,7 +101,7 @@ fun RegistrationScrollContent(
 
                 override suspend fun register(): String {
                     Log.d("Sign up", "Registering ${account.value.email}")
-                    val result = registerUser(account.value.name, account.value.email, account.value.password)
+                    val result = accountService.registerUser(account.value.name, account.value.email, account.value.password)
                     if (result == "Success") {
                         scope.launch {
                             val user = userSession?.user?.email
